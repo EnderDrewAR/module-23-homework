@@ -1,0 +1,25 @@
+using UnityEngine;
+
+public class Health 
+{
+    public float Max { get; }
+    public float Current { get; private set; }
+    
+    public bool IsDead => Current <= 0f;
+    public bool IsInjured => !IsDead && Current * 10f < Max * 3f;
+    
+    public Health(float maxHealth)
+    {
+        Max = Mathf.Max(1f, maxHealth);
+        Current = Max;
+    }
+
+    public void TakeDamage(float damage)
+    {
+        if (IsDead || damage <= 0f)
+            return;
+        
+        Current = Mathf.Max(0f, Current - damage);
+    }
+
+}
