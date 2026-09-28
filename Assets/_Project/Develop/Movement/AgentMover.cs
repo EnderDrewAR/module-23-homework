@@ -6,6 +6,12 @@ public class AgentMover
     private readonly NavMeshAgent _agent;
 
     public Vector3 CurrentVelocity => _agent.velocity;
+    public bool HasDestination => _agent.isActiveAndEnabled
+        && _agent.isOnNavMesh
+        && _agent.isStopped == false
+        && (_agent.pathPending || _agent.hasPath);
+    public Vector3 Destination => _agent.destination;
+    public float StoppingDistance => _agent.stoppingDistance;
 
     public AgentMover(NavMeshAgent agent, float movementSpeed)
     {

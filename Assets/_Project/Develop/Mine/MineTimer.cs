@@ -24,7 +24,7 @@ public class MineTimer
 
     public void Update(float deltaTime)
     {
-        if (!IsActivated || IsFinished)
+        if (IsActivated == false || IsFinished)
             return;
         
         _remainingTime = Mathf.Max(0f, _remainingTime - Mathf.Max(0f, deltaTime));

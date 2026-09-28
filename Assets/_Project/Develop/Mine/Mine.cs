@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Mine : MonoBehaviour
@@ -6,16 +7,15 @@ public class Mine : MonoBehaviour
     [SerializeField, Min(0f)] private float _explosionRadius = 3f;
     [SerializeField, Min(0f)] private float _explosionDelay = 1.5f;
     [SerializeField, Min(0f)] private float _damage = 25f;
+    [SerializeField] private LayerMask _damageableMask = 0;
  
-    private IDamageableTarget _target;
     private MineTimer _timer;
+    private readonly HashSet<IDamageable> _damagedTargets = new HashSet<IDamageable>();
     
     public bool IsActivated => _timer != null && _timer.IsActivated;
     public bool HasExploded { get; private set; }
 
     private void Awake() => _timer = new MineTimer(_explosionDelay);
-
-    public void Initialize(IDamageableTarget target) => _target = target;
 
     private void Update() => Tick(Time.deltaTime);
 
@@ -24,7 +24,7 @@ public class Mine : MonoBehaviour
         if (HasExploded)
             return;
 
-        if (!IsActivated && IsTargetAlive() && IsTargetInRadius(_activationRadius))
+        if (IsActivated == false && HasDamageableInRadius(_activationRadius))
             _timer.Activate();
 
         _timer.Update(deltaTime);
@@ -32,36 +32,62 @@ public class Mine : MonoBehaviour
         if (_timer.IsFinished)
         {
             HasExploded = true;
-            if (IsTargetAlive() && IsTargetInRadius(_explosionRadius))
-                _target.TakeDamage(_damage);
+            DamageTargetsInRadius();
         }
     }
 
-    private bool IsTargetAlive()
+    private bool HasDamageableInRadius(float radius)
     {
-        if (_target == null)
-            return false;
-        if (_target is Object unityObject && unityObject == null)
-            return false;
-        return !_target.IsDead;
+        foreach (Collider targetCollider in GetOverlappingColliders(radius))
+        {
+            IDamageable target = FindDamageable(targetCollider);
+
+            if (target != null && IsAlive(target))
+                return true;
+        }
+
+        return false;
     }
 
-    private bool IsTargetInRadius(float radius)
+    private void DamageTargetsInRadius()
     {
-        Vector3 offset = _target.Position - transform.position;
-        offset.y = 0f;
-        return offset.sqrMagnitude <= radius * radius;
+        _damagedTargets.Clear();
+
+        foreach (Collider targetCollider in GetOverlappingColliders(_explosionRadius))
+        {
+            IDamageable target = FindDamageable(targetCollider);
+
+            if (target != null && IsAlive(target) && _damagedTargets.Add(target))
+                target.TakeDamage(_damage);
+        }
+    }
+
+    private Collider[] GetOverlappingColliders(float radius) => Physics.OverlapSphere(
+        transform.position,
+        radius,
+        _damageableMask,
+        QueryTriggerInteraction.Collide);
+
+    private static IDamageable FindDamageable(Collider targetCollider)
+        => targetCollider.GetComponentInParent(typeof(IDamageable)) as IDamageable;
+
+    private static bool IsAlive(IDamageable target)
+    {
+        if (target is IKillable killable)
+            return killable.IsDead == false;
+
+        return true;
     }
 
     private void OnDrawGizmos()
     {
-        if (!HasExploded)
+        if (HasExploded == false)
             DrawRadius(_explosionRadius, Color.red);
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (!HasExploded)
+        if (HasExploded == false)
             DrawRadius(_activationRadius, Color.yellow);
     }
 

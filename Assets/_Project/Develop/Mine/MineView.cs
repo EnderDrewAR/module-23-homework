@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class MineView : MonoBehaviour
 {
-    [SerializeField] private ParticleSystem _explosionEffect;
+    [SerializeField] private ParticleSystem _explosionEffectPrefab;
 
     private Mine _mine;
     private MeshRenderer[] _renderers;
@@ -47,8 +47,17 @@ public class MineView : MonoBehaviour
         foreach (MeshRenderer renderer in _renderers)
             renderer.enabled = false;
 
-        if (_explosionEffect != null)
-            _explosionEffect.Play();
+        if (_explosionEffectPrefab != null)
+        {
+            ParticleSystem explosionEffect = Instantiate(
+                _explosionEffectPrefab,
+                transform.position,
+                Quaternion.identity);
+            ParticleSystem.MainModule main = explosionEffect.main;
+            main.loop = false;
+            main.stopAction = ParticleSystemStopAction.Destroy;
+            explosionEffect.Play();
+        }
 
         enabled = false;
     }

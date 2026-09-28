@@ -7,9 +7,6 @@ public class ClickMaker : MonoBehaviour
     [SerializeField, Min(0f)] private float _hideDistance = 0.2f;
     [SerializeField] private float _heightOffset = 0.05f;
 
-    private Vector3 _destination;
-    private UnityEngine.AI.NavMeshAgent _agent;
-
     private void Awake()
     {
         Hide();
@@ -18,7 +15,6 @@ public class ClickMaker : MonoBehaviour
     public void Initialize(Character character)
     {
         _character = character;
-        _agent = character.GetComponent<UnityEngine.AI.NavMeshAgent>();
 
         if (_marker == null)
             CreateMarker();
@@ -28,30 +24,29 @@ public class ClickMaker : MonoBehaviour
 
     private void Update()
     {
-        if (_marker == null || !_marker.activeSelf || _character == null)
+        if (_marker == null || _character == null)
             return;
 
-        if (_character.IsDead)
+        if (_character.IsDead || _character.HasDestination == false)
         {
             Hide();
             return;
         }
 
-        Vector3 distance = _destination - _character.Position;
+        Vector3 destination = _character.Destination;
+        Vector3 distance = destination - _character.Position;
         distance.y = 0f;
-        float hideDistance = _agent == null
-            ? _hideDistance
-            : Mathf.Max(_hideDistance, _agent.stoppingDistance + 0.05f);
+        float hideDistance = Mathf.Max(_hideDistance, _character.StoppingDistance + 0.05f);
 
         if (distance.sqrMagnitude <= hideDistance * hideDistance)
+        {
             Hide();
-    }
+            return;
+        }
 
-    public void Show(Vector3 destination)
-    {
-        _destination = destination;
         _marker.transform.position = destination + Vector3.up * _heightOffset;
-        _marker.SetActive(true);
+        if (_marker.activeSelf == false)
+            _marker.SetActive(true);
     }
 
     public void Hide()

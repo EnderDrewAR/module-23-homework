@@ -21,7 +21,7 @@ public class InputSystem : MonoBehaviour
         _clickMaker.Initialize(_character);
 
         _characterController = new CompositeController(
-            new PlayerClickMovableController(_character, _camera, _groundMask, _clickMaker),
+            new PlayerClickMovableController(_character, _camera, _groundMask),
             new AlongMovableVelocitylRotatableController(_character, _character)
             );
         

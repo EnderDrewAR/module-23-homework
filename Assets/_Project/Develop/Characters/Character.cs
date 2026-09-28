@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.AI;
 
 [RequireComponent(typeof(NavMeshAgent))]
-public class Character : MonoBehaviour, IVelocitySource, IDirectionalRotatable, IDamageableTarget
+public class Character : MonoBehaviour, IVelocitySource, IDirectionalRotatable, IDamageable, IKillable
 {
     public event System.Action Damaged;
     private NavMeshAgent _agent;
@@ -22,6 +22,9 @@ public class Character : MonoBehaviour, IVelocitySource, IDirectionalRotatable, 
     public Vector3 CurrentVelocity => _mover.CurrentVelocity;
     public Quaternion CurrentRotation => _rotator.CurrentRotation;
     public Vector3 Position => transform.position;
+    public bool HasDestination => _mover.HasDestination;
+    public Vector3 Destination => _mover.Destination;
+    public float StoppingDistance => _mover.StoppingDistance;
 
     private void Awake()
     {
@@ -57,28 +60,28 @@ public class Character : MonoBehaviour, IVelocitySource, IDirectionalRotatable, 
     
     public void SetDestination(Vector3 position)
     {
-        if (!IsDead)
+        if (IsDead == false)
             _mover.SetDestination(position);
     }
 
-    public bool SetPath(NavMeshPath path) => !IsDead && _mover.SetPath(path);
+    public bool SetPath(NavMeshPath path) => IsDead == false && _mover.SetPath(path);
 
     public void StopMove() => _mover.Stop();
 
     public void ResumeMove()
     {
-        if (!IsDead)
+        if (IsDead == false)
             _mover.Resume();
     }
 
     public void SetRotationDirection(Vector3 direction)
     {
-        if (!IsDead)
+        if (IsDead == false)
             _rotator.SetInputDirection(direction);
     }
 
     public bool TryGetPath(Vector3 targetPosition, NavMeshPath pathToTarget)
-        => !IsDead && NavMeshUtils.TryGetPath(_agent, targetPosition, pathToTarget);
+        => IsDead == false && NavMeshUtils.TryGetPath(_agent, targetPosition, pathToTarget);
     
     
 }

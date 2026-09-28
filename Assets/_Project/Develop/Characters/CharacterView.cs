@@ -33,7 +33,7 @@ public class CharacterView : MonoBehaviour
         _animator.SetBool(IsDeadKey, _character.IsDead);
         _animator.SetBool(IsInjuredKey, _character.IsInjured);
 
-        if (!_character.IsDead && _character.CurrentVelocity.magnitude > DeadZone)
+        if (_character.IsDead == false && _character.CurrentVelocity.magnitude > DeadZone)
             StartRunning();
         else
             StopRunning();

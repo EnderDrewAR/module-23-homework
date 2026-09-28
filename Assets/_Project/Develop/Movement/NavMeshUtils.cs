@@ -24,7 +24,7 @@ public static class NavMeshUtils
     public static bool TryGetPath(NavMeshAgent agent, Vector3 targetPosition,
         NavMeshPath pathToTarget)
     {
-        if (!agent.isActiveAndEnabled || !agent.isOnNavMesh)
+        if (agent.isActiveAndEnabled == false || agent.isOnNavMesh == false)
             return false;
 
         var filter = new NavMeshQueryFilter
@@ -33,7 +33,7 @@ public static class NavMeshUtils
             areaMask = agent.areaMask
         };
 
-        if (!NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 0.5f, filter))
+        if (NavMesh.SamplePosition(targetPosition, out NavMeshHit hit, 0.5f, filter) == false)
             return false;
 
         return agent.CalculatePath(hit.position, pathToTarget)
