@@ -3,6 +3,7 @@ using UnityEngine;
 public class MineView : MonoBehaviour
 {
     [SerializeField] private ParticleSystem _explosionEffectPrefab;
+    [SerializeField] private AudioSource _audioSource;
 
     private Mine _mine;
     private MeshRenderer[] _renderers;
@@ -44,6 +45,7 @@ public class MineView : MonoBehaviour
 
     private void ShowExplosion()
     {
+        _audioSource.Play();
         foreach (MeshRenderer renderer in _renderers)
             renderer.enabled = false;
 

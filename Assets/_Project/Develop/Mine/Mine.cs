@@ -8,18 +8,19 @@ public class Mine : MonoBehaviour
     [SerializeField, Min(0f)] private float _explosionDelay = 1.5f;
     [SerializeField, Min(0f)] private float _damage = 25f;
     [SerializeField] private LayerMask _damageableMask = 0;
- 
+
     private MineTimer _timer;
     private readonly HashSet<IDamageable> _damagedTargets = new HashSet<IDamageable>();
-    
+
     public bool IsActivated => _timer != null && _timer.IsActivated;
     public bool HasExploded { get; private set; }
 
-    private void Awake() => _timer = new MineTimer(_explosionDelay);
+    private void Awake()
+    {
+        _timer = new MineTimer(_explosionDelay, this);
+    }
 
-    private void Update() => Tick(Time.deltaTime);
-
-    public void Tick(float deltaTime)
+    private void Update()
     {
         if (HasExploded)
             return;
@@ -27,13 +28,12 @@ public class Mine : MonoBehaviour
         if (IsActivated == false && HasDamageableInRadius(_activationRadius))
             _timer.Activate();
 
-        _timer.Update(deltaTime);
-
         if (_timer.IsFinished)
         {
             HasExploded = true;
             DamageTargetsInRadius();
         }
+            
     }
 
     private bool HasDamageableInRadius(float radius)

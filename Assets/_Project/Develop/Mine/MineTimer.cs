@@ -1,16 +1,22 @@
+using System.Collections;
 using UnityEngine;
 
 public class MineTimer
 {
     private readonly float _delay;
+    private readonly MonoBehaviour _coroutineRunner;
     private float _remainingTime;
 
     public bool IsActivated { get; private set; }
-    public bool IsFinished => IsActivated && _remainingTime <= 0f;
+    public bool IsFinished { get; private set; }
     
-    public MineTimer(float delay)
+    public MineTimer(float delay, MonoBehaviour coroutineRunner)
     {
+        _coroutineRunner = coroutineRunner;
         _delay = Mathf.Max(0f, delay);
+        
+        IsActivated = false;
+        IsFinished = false;
     }
 
     public void Activate()
@@ -19,14 +25,13 @@ public class MineTimer
             return;
         
         IsActivated = true;
-        _remainingTime = _delay;
+        _coroutineRunner.StartCoroutine(TimerProcess());
     }
 
-    public void Update(float deltaTime)
+    private IEnumerator TimerProcess()
     {
-        if (IsActivated == false || IsFinished)
-            return;
-        
-        _remainingTime = Mathf.Max(0f, _remainingTime - Mathf.Max(0f, deltaTime));
+        yield return new WaitForSeconds(_delay);
+
+        IsFinished = true;
     }
 }
